@@ -99,7 +99,7 @@ export const generateCaptionsFromAnalysis = async (imageAnalysis, style = 'funny
     } catch (e) {
       console.error('Error parsing JSON response:', e);
       // Fallback: try to extract array-like content from the string
-      const matches = content.match(/\\[([^\\]]+)\\]/);
+      const matches = content.match(/\[([^\]]+)\]/);
       if (matches && matches[1]) {
         return matches[1].split(',').map(item => item.trim().replace(/"/g, ''));
       }
