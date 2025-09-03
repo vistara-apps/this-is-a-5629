@@ -17,23 +17,13 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '22'
-        
-    - name: Enable Corepack
-      run: corepack enable
-      
-    - name: Setup Yarn Cache
-      uses: actions/setup-node@v4
-      with:
-        node-version: '22'
-        cache: 'yarn'
+        cache: 'npm'
         
     - name: Install dependencies
-      run: yarn install --immutable
-      env:
-        YARN_ENABLE_HARDENED_MODE: false
-
+      run: npm install
+      
     - name: Build application
-      run: yarn build
+      run: npm run build
       env:
         NODE_OPTIONS: --max-old-space-size=4096
         
