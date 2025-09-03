@@ -5,7 +5,7 @@ import { getUserData, signInWithWallet } from '../services/userService';
 import { useWalletClient } from 'wagmi';
 
 // Create the authentication context
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
 // Custom hook to use the auth context
 export const useAuth = () => {
