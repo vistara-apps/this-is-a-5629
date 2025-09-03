@@ -28,7 +28,9 @@ jobs:
         cache: 'yarn'
         
     - name: Install dependencies
-      run: yarn install
+      run: yarn install --immutable
+      env:
+        YARN_ENABLE_HARDENED_MODE: false
 
     - name: Build application
       run: yarn build
@@ -74,3 +76,4 @@ jobs:
               \n\nThis preview will be automatically updated when you push new commits to this PR.`
             });
           }
+
