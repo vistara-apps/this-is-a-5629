@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import OpenAI from 'openai';
+import { analyzeImageAndGenerateCaptions, generateCaptionsFromAnalysis } from '../services/imageAnalysisService';
 
 const openai = new OpenAI({
   apiKey: import.meta.env.VITE_OPENAI_API_KEY || '',
@@ -10,7 +11,9 @@ const openai = new OpenAI({
 export function useAIGeneration() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState(null);
+  const [imageAnalysis, setImageAnalysis] = useState(null);
 
+  // Generate caption based on text description
   const generateCaption = async (imageDescription, style = 'funny') => {
     setIsGenerating(true);
     setError(null);
@@ -26,7 +29,7 @@ export function useAIGeneration() {
         messages: [
           {
             role: 'system',
-            content: 'You are a expert meme creator who generates viral, witty captions that resonate with internet culture.'
+            content: 'You are an expert meme creator who generates viral, witty captions that resonate with internet culture.'
           },
           {
             role: 'user',
@@ -46,6 +49,7 @@ export function useAIGeneration() {
     }
   };
 
+  // Generate multiple captions based on text description
   const generateMultipleCaptions = async (imageDescription, count = 3) => {
     const captions = [];
     for (let i = 0; i < count; i++) {
@@ -59,10 +63,58 @@ export function useAIGeneration() {
     return captions;
   };
 
+  // Analyze image and generate captions based on the analysis
+  const generateCaptionsFromImage = async (imageFile, style = 'funny', count = 3) => {
+    setIsGenerating(true);
+    setError(null);
+
+    try {
+      const result = await analyzeImageAndGenerateCaptions(imageFile, style, count);
+      setImageAnalysis(result.analysis);
+      return result.captions;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  // Generate captions with different styles
+  const generateCaptionsWithStyles = async (imageFile, styles = ['funny', 'sarcastic', 'wholesome']) => {
+    setIsGenerating(true);
+    setError(null);
+
+    try {
+      const results = {};
+      
+      // First analyze the image once
+      const analysis = await analyzeImageAndGenerateCaptions(imageFile, 'funny', 1);
+      setImageAnalysis(analysis.analysis);
+      
+      // Then generate captions for each style
+      for (const style of styles) {
+        const captions = await generateCaptionsFromAnalysis(analysis.analysis, style, 2);
+        results[style] = captions;
+      }
+      
+      return results;
+    } catch (err) {
+      setError(err.message);
+      throw err;
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
   return {
     generateCaption,
     generateMultipleCaptions,
+    generateCaptionsFromImage,
+    generateCaptionsWithStyles,
+    imageAnalysis,
     isGenerating,
     error
   };
 }
+
