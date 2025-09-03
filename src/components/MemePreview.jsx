@@ -1,12 +1,14 @@
 import { useRef, useEffect } from 'react';
 
-export function MemePreview({ imageUrl, topText, bottomText, className = '' }) {
-  const canvasRef = useRef(null);
+export function MemePreview({ imageUrl, topText, bottomText, canvasRef, className = '' }) {
+  // Use provided canvasRef or create a local one
+  const localCanvasRef = useRef(null);
+  const actualCanvasRef = canvasRef || localCanvasRef;
 
   useEffect(() => {
-    if (!imageUrl || !canvasRef.current) return;
+    if (!imageUrl || !actualCanvasRef.current) return;
 
-    const canvas = canvasRef.current;
+    const canvas = actualCanvasRef.current;
     const ctx = canvas.getContext('2d');
     const img = new Image();
 
@@ -47,7 +49,7 @@ export function MemePreview({ imageUrl, topText, bottomText, className = '' }) {
     };
 
     img.src = imageUrl;
-  }, [imageUrl, topText, bottomText]);
+  }, [imageUrl, topText, bottomText, actualCanvasRef]);
 
   const wrapText = (ctx, text, maxWidth) => {
     const words = text.split(' ');
@@ -69,7 +71,9 @@ export function MemePreview({ imageUrl, topText, bottomText, className = '' }) {
   };
 
   const downloadMeme = () => {
-    const canvas = canvasRef.current;
+    const canvas = actualCanvasRef.current;
+    if (!canvas) return;
+    
     const link = document.createElement('a');
     link.download = 'meme.png';
     link.href = canvas.toDataURL();
@@ -84,6 +88,7 @@ export function MemePreview({ imageUrl, topText, bottomText, className = '' }) {
           <button
             onClick={downloadMeme}
             className="bg-primary text-white px-4 py-2 rounded-lg hover:bg-primary/90 transition-colors text-sm"
+            disabled={!imageUrl}
           >
             Download
           </button>
@@ -92,7 +97,7 @@ export function MemePreview({ imageUrl, topText, bottomText, className = '' }) {
         {imageUrl ? (
           <div className="relative bg-gray-100 rounded-lg overflow-hidden">
             <canvas
-              ref={canvasRef}
+              ref={actualCanvasRef}
               className="w-full h-auto max-h-96 object-contain"
             />
           </div>
